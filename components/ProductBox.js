@@ -184,7 +184,7 @@ return (
         </Link>
         <div className="pl-2 text-left flex-grow flex flex-col">
           <p className="text-md font-semibold" title={title}>
-            {truncateText(title, 20)}
+            {truncateText(title, 17)}
           </p>
           <div className="text-sm flex flex-wrap -mb-2.5 gap-0.5 flex-grow relative">
             {displayedValues.map((value, index) => (
