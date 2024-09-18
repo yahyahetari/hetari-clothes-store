@@ -33,6 +33,25 @@ const shuffleArray = (array) => {
     return array;
 };
 
+// Helper function to sort size values
+const sortSizeValues = (values) => {
+    const sizeOrder = ['xs', 's', 'm', 'l', 'xl', '2xl', '3xl', '4xl', '5xl'];
+    return values.sort((a, b) => {
+        const aIndex = sizeOrder.indexOf(a.toLowerCase());
+        const bIndex = sizeOrder.indexOf(b.toLowerCase());
+        if (aIndex === -1 && bIndex === -1) return a.localeCompare(b);
+        if (aIndex === -1) return 1;
+        if (bIndex === -1) return -1;
+        return aIndex - bIndex;
+    });
+};
+
+// Helper function to check if a property is a size property
+const isSizeProperty = (name) => name.toLowerCase().includes('size') || name.includes('مقاس');
+
+// Helper function to check if a property is a color property
+const isColorProperty = (name) => name.toLowerCase() === "color" || name.toLowerCase() === "لون";
+
 export default function ProductPage({ product, sameSubcategoryProducts, otherSubcategoryProducts }) {
     const { addToCart } = useContext(CartContext);
     const [selectedProperties, setSelectedProperties] = useState({});
@@ -47,6 +66,10 @@ export default function ProductPage({ product, sameSubcategoryProducts, otherSub
             const initialSelected = {};
             Object.entries(product.properties).forEach(([name, values]) => {
                 if (Array.isArray(values) && values.length > 0) {
+                    // Sort size values if the property name includes 'size' or 'مقاس'
+                    if (isSizeProperty(name)) {
+                        values = sortSizeValues(values);
+                    }
                     initialSelected[name] = values[0];
                 }
             });
@@ -94,8 +117,6 @@ export default function ProductPage({ product, sameSubcategoryProducts, otherSub
         addToCart(product._id, selectedProperties, quantity);
     };
 
-    const isColorProperty = (name) => name.toLowerCase() === "color" || name.toLowerCase() === "لون";
-
     const loadMoreProducts = () => {
         const currentLength = visibleProducts.length;
         const remainingSameCategory = sameSubcategoryProducts.slice(currentLength);
@@ -117,7 +138,7 @@ export default function ProductPage({ product, sameSubcategoryProducts, otherSub
                 </div>
                 <div className="flex-grow md:w-1/2 flex flex-col gap-4">
                     <div>
-                        <h1 className="text-3xl font-semibold">{product.title}</h1>
+                        <h1 className="text-2xl font-semibold">{product.title}</h1>
                         <p className="text-xl font-semibold mt-2">$ {product.price}</p>
                     </div>
                     <p className="text-lg">{product.description}</p>
@@ -130,7 +151,7 @@ export default function ProductPage({ product, sameSubcategoryProducts, otherSub
                                         <div key={index} className="w-full md:w-1/2">
                                             <p className="text-base font-semibold">{name} :</p>
                                             <div className="flex gap-2 flex-wrap">
-                                                {values.map((value, idx) => (
+                                                {(isSizeProperty(name) ? sortSizeValues([...values]) : values).map((value, idx) => (
                                                     isColorProperty(name) ? (
                                                         <button
                                                             type="button"
