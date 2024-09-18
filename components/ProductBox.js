@@ -182,7 +182,7 @@ return (
             </div>
           </div>
         </Link>
-        <div className="pl-2 text-left flex-grow flex flex-col">
+        <div className="pl-2 pb-1 text-left flex-grow flex flex-col">
           <p className="text-md font-semibold" title={title}>
             {truncateText(title, 17)}
           </p>
