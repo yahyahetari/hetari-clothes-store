@@ -5,7 +5,6 @@ import { Toaster } from 'react-hot-toast';
 import Auth from '@/components/Auth';
 import { SessionProvider } from 'next-auth/react';
 import Footer from '@/components/Footer';
-import StoreFeatures from '@/components/StoreFeatures';
 
 export default function App({ 
   Component, pageProps : {session, ...pageProps } 
@@ -20,7 +19,6 @@ export default function App({
             <Toaster position="top-center" reverseOrder={false} />
               <Component {...pageProps} />
           </main>
-          <StoreFeatures/>
           <Footer />
             </Auth>
         </div>

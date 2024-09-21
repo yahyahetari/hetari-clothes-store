@@ -28,12 +28,10 @@ export default function Cart() {
             }
         }
 
-        // Set a timeout to change the loading state after 5 seconds
         const timer = setTimeout(() => {
             setLoading(false);
         }, 5000);
 
-        // Clear the timer if the component unmounts
         return () => clearTimeout(timer);
     }, [setCart]);
 
@@ -43,14 +41,12 @@ export default function Cart() {
             axios.post('/api/cart', { items: cart }).then((response) => {
                 const groupedProducts = groupProductsByProperties(response.data);
                 setProducts(groupedProducts);
-                // Only set loading to false if 5 seconds have passed
                 timer = setTimeout(() => {
                     setLoading(false);
                 }, 5000);
             });
         } else {
             setProducts([]);
-            // Still wait 5 seconds before setting loading to false
             timer = setTimeout(() => {
                 setLoading(false);
             }, 5000);
@@ -87,12 +83,17 @@ export default function Cart() {
     }
 
     function decreaseQuantity(id, properties) {
-        const updatedCart = [...cart];
-        const index = updatedCart.findIndex(item => item.id === id && JSON.stringify(item.properties) === JSON.stringify(properties));
-        if (index !== -1) {
-            updatedCart.splice(index, 1);
-            setCart(updatedCart);
-            updateLocalStorage(updatedCart);
+        const product = products.find(p => p._id === id && JSON.stringify(p.properties) === JSON.stringify(properties));
+        if (product && product.quantity === 1) {
+            setProductToDelete(product);
+        } else {
+            const updatedCart = [...cart];
+            const index = updatedCart.findIndex(item => item.id === id && JSON.stringify(item.properties) === JSON.stringify(properties));
+            if (index !== -1) {
+                updatedCart.splice(index, 1);
+                setCart(updatedCart);
+                updateLocalStorage(updatedCart);
+            }
         }
     }
 
@@ -204,7 +205,7 @@ export default function Cart() {
             </div>
 
             {productToDelete && (
-                <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75">
+                <div className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-75">
                     <div className="max-w-sm p-6 bg-white bg-opacity-30 backdrop-blur-md border border-gray-200 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700">
                         <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-950 dark:text-white">Delete Product</h5>
                         <p className="mb-4 text-gray-200">

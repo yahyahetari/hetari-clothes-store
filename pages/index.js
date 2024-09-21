@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { useSwipeable } from 'react-swipeable';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from "next/link";
+import StoreFeatures from "@/components/StoreFeatures";
 
 export default function Home({ categories, allProducts, error }) {
     const [loading, setLoading] = useState(true);
@@ -183,6 +184,7 @@ export default function Home({ categories, allProducts, error }) {
                     )}
                 </div>
             </div>
+            <StoreFeatures/>
         </div>
     );
 }
