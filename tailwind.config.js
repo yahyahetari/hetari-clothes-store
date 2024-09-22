@@ -14,8 +14,8 @@ module.exports = {
         'glass': 'blur(10px)',
       },
       backgroundColor: {
-        'glass': 'rgba(255, 255, 255, 0.1)',
-        'h-glass':'rgba(255, 255, 255, 0.5)',
+        'glass': 'rgba(0, 0, 0, 0.1)',
+        'h-glass':'rgba(0, 0, 0, 0.5)',
       },
     },
     

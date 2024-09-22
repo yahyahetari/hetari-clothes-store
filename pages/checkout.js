@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from "react";
 import { useRouter } from 'next/router';
 import Loader from "@/components/Loader";
 import { useSession } from "next-auth/react";
+import Auth from "@/components/Auth";
 
 export default function Cart() {
     const router = useRouter();
@@ -169,6 +170,7 @@ export default function Cart() {
 
     return (
         <div>
+            <Auth>
             <div className="flex flex-col lg:flex-row justify-between lg:space-x-4 mt-6 px-3">
                 {!!cart?.length && (
                     <div className="lg:w-2/3 flex flex-col h-fit items-center border-2 border-black p-5 rounded-lg">
@@ -356,6 +358,7 @@ export default function Cart() {
                     </button>
                 </div>
             </div>
+            </Auth>
         </div>
     );
 }

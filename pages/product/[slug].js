@@ -215,7 +215,7 @@ export default function ProductPage({ product, sameSubcategoryProducts, otherSub
             />
 
             {/* Related Products Section */}
-            <div className="mt-8">
+            <div>
                 <h2 className="text-2xl font-semibold mb-4">Related Products</h2>
 
                 {visibleProducts.length > 0 && (

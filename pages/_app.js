@@ -13,14 +13,13 @@ export default function App({
     <SessionProvider session={session}>
       <CartContextProvider>
         <div className="flex flex-col min-h-screen">
-            <Auth>
+            
           <Header />
           <main className="flex-grow pt-20"> 
             <Toaster position="top-center" reverseOrder={false} />
               <Component {...pageProps} />
           </main>
           <Footer />
-            </Auth>
         </div>
       </CartContextProvider>
     </SessionProvider>

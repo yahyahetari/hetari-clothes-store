@@ -70,14 +70,14 @@ export default function Gallery({ images }) {
           className="absolute top-1/2 left-4 transform -translate-y-1/2 text-white bg-glass p-2 rounded-full"
           aria-label="Previous Image"
         >
-          <ChevronLeft size={24} />
+          <ChevronLeft size={24} color='black' />
         </button>
         <button
           onClick={() => changeImage(1)}
           className="absolute top-1/2 right-4 transform -translate-y-1/2 text-white bg-glass p-2 rounded-full"
           aria-label="Next Image"
         >
-          <ChevronRight size={24} />
+          <ChevronRight size={24} color='black' />
         </button>
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white bg-black bg-opacity-50 pr-2 pl-2 rounded-3xl">
           {images.length} / {currentIndex}

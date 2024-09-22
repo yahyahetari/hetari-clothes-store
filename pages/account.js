@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { useSession, signOut } from "next-auth/react";
 import { FaSearch, FaChevronLeft, FaChevronRight, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGlobe, FaEdit } from 'react-icons/fa';
 import Loader from "@/components/Loader";
+import Auth from "@/components/Auth";
 
 export default function Account() {
     const [shippingInfo, setShippingInfo] = useState(null);
@@ -111,6 +112,7 @@ export default function Account() {
     }
     return (
         <div className="bg-gray-100 min-h-screen">
+            <Auth>
             <nav className="bg-white shadow-sm">
                 <div className="container mx-auto px-4 py-3 flex justify-between items-center">
                     <h1 className="text-2xl font-bold text-gray-800">Your Account</h1>
@@ -247,6 +249,7 @@ export default function Account() {
                     </div>
                 </div>
             </div>
+            </Auth>
         </div>
     );
 }

@@ -66,7 +66,7 @@ const RatingsAndReviews = ({ productId, initialRatings = [] }) => {
     );
 
     return (
-        <div className="mt-8 bg-slate-200 p-3 mb-8">
+        <div className="mt-8 bg-slate-200 p-3 ">
             <div 
                 className="flex justify-between items-center cursor-pointer" 
                 onClick={() => setIsExpanded(!isExpanded)}

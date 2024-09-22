@@ -186,7 +186,7 @@ export default function Header() {
             </button>
             {userDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                <div className="px-4 py-2 border-b border-gray-200">
+                <div className="px-4 py-2 border-b text-center border-gray-200">
                   <p className="font-semibold">{session.user.name}</p>
                   <p className="text-sm text-gray-500">{session.user.email}</p>
                 </div>
