@@ -131,10 +131,10 @@ export default function Header() {
             </div>
           ) : (
             <Link href="/api/auth/signin" className="md:hidden">
-              <UserCircle2 className="w-8 h-8" />
+              <UserCircle2 className="w-8 h-8 mr-3" />
             </Link>
           )}
-          <Menu onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }} className="cursor-pointer mr-2" />
+          <Menu onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }} className="cursor-pointer mr-3" />
 
         </div>
         <div className="flex-grow flex justify-center md:justify-start">
@@ -197,7 +197,7 @@ export default function Header() {
           </div>
         ) : (
           <Link href="/api/auth/signin" className="hidden md:block">
-            <UserCircle2 className="w-8 h-8" />
+            <UserCircle2 className="w-8 h-8 " />
           </Link>
         )}
       </div>

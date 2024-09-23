@@ -2,7 +2,9 @@ import { useState, useContext, useEffect } from 'react';
 import { CartContext } from './CartContext';
 import { motion } from 'framer-motion';
 import { FaTimes } from 'react-icons/fa';
-import { MinusCircle, PlusCircle } from 'lucide-react';
+import { MinusCircle, PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
+import { useSwipeable } from 'react-swipeable';
 
 const getColorHex = (colorName) => {
     const colors = {
@@ -35,6 +37,8 @@ const QuickAddToCart = ({ product, onClose }) => {
     const { addToCart } = useContext(CartContext);
     const [selectedProperties, setSelectedProperties] = useState({});
     const [quantity, setQuantity] = useState(1);
+    const [mainImage, setMainImage] = useState(() => product.images[0]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (product.properties) {
@@ -49,7 +53,32 @@ const QuickAddToCart = ({ product, onClose }) => {
             });
             setSelectedProperties(initialSelected);
         }
-    }, [product.properties]);
+        setMainImage(product.images[0]);
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 2000);
+        return () => clearTimeout(timer);
+    }, [product.properties, product.images]);
+
+    const handlers = useSwipeable({
+        onSwipedLeft: () => changeImage(1),
+        onSwipedRight: () => changeImage(-1),
+        preventDefaultTouchmoveEvent: true,
+        trackMouse: true
+    });
+
+    const changeImage = (direction) => {
+        const currentIndex = product.images.indexOf(mainImage);
+        const newIndex = (currentIndex + direction + product.images.length) % product.images.length;
+        setMainImage(product.images[newIndex]);
+    };
+
+    const currentIndex = product.images.indexOf(mainImage) + 1;
+
+    const shimmerEffect = {
+        hidden: { x: '-100%' },
+        visible: { x: '100%' },
+    };
 
     const toggleProperty = (name, value) => {
         setSelectedProperties(prevState => ({
@@ -91,24 +120,90 @@ const QuickAddToCart = ({ product, onClose }) => {
                 </button>
 
                 <div className="flex flex-row">
-                    <div className=" pr-4">
-                        <img src={product.images[0]} alt={product.title} className="w-full h-80 object-cover rounded-lg shadow-md" />
+                    <div className="md:w-1/2 pr-4">
+                        <div {...handlers} className="relative w-full">
+                            {isLoading ? (
+                                <div className="w-full h-[400px] bg-gray-300 rounded-lg relative overflow-hidden">
+                                    <motion.div
+                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent"
+                                        initial="hidden"
+                                        animate="visible"
+                                        variants={shimmerEffect}
+                                        transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                                        style={{ width: '50%', opacity: 0.2 }}
+                                    />
+                                </div>
+                            ) : (
+                                <Image
+                                    src={mainImage}
+                                    width={500}
+                                    height={400}
+                                    alt="Main product image"
+                                    className="rounded-lg shadow-xl object-cover w-full h-80"
+                                />
+                            )}
+                            <button
+                                onClick={() => changeImage(-1)}
+                                className="absolute top-1/2 left-1 transform -translate-y-1/2 text-white bg-glass p-1 rounded-full"
+                                aria-label="Previous Image"
+                            >
+                                <ChevronLeft size={24} color='black' />
+                            </button>
+                            <button
+                                onClick={() => changeImage(1)}
+                                className="absolute top-1/2 right-1 transform -translate-y-1/2 text-white bg-glass p-1 rounded-full"
+                                aria-label="Next Image"
+                            >
+                                <ChevronRight size={24} color='black' />
+                            </button>
+                            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white bg-black bg-opacity-50 pr-2 pl-2 rounded-3xl">
+                                {product.images.length} / {currentIndex}
+                            </div>
+                        </div>
+
+                        <div className="hidden md:flex gap-2 overflow-auto mt-2">
+                            {product.images.map((image, index) => (
+                                <div key={index} className="relative w-20 h-20">
+                                    {isLoading ? (
+                                        <div className="w-20 h-20 bg-gray-300 rounded-lg relative overflow-hidden">
+                                            <motion.div
+                                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent"
+                                                initial="hidden"
+                                                animate="visible"
+                                                variants={shimmerEffect}
+                                                transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                                                style={{ width: '50%', opacity: 0.2 }}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <Image
+                                            src={image}
+                                            width={100}
+                                            height={100}
+                                            alt={`Thumbnail ${index}`}
+                                            className={`w-20 h-20 rounded-lg object-cover cursor-pointer ${mainImage === image ? 'border-2 border-black' : ''}`}
+                                            onClick={() => setMainImage(image)}
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
-                    <div className="md:w-1/2 mt-4 ">
-                        <h2 className="text-2xl font-bold mb-2">{product.title}</h2>
-                        <p className="text-xl font-semibold mb-4">$ {product.price}</p>
+                    <div className="md:w-1/2 mt-4">
+                        <h2 className="text-xl font-bold">{product.title}</h2>
+                        <p className="text-lg font-semibold">$ {product.price}</p>
 
                         {product.properties && Object.entries(product.properties).map(([name, values]) => (
                             Array.isArray(values) && values.length > 0 && (
-                                <div key={name} className="mb-4">
+                                <div key={name} className="mb-2">
                                     <p className="text-base font-semibold">{name} :</p>
                                     <div className="flex flex-wrap gap-2">
                                         {(isSizeProperty(name) ? sortSizeValues([...values]) : values).map((value, idx) => (
                                             isColorProperty(name) ? (
                                                 <button
                                                     key={idx}
-                                                    className={`w-7 h-7 rounded-full border border-black ${selectedProperties[name] === value ? 'ring-2 ring-offset-2 ring-black' : ''}`}
+                                                    className={`w-5 h-5 rounded-full border border-black ${selectedProperties[name] === value ? 'ring-2 ring-offset-2 ring-black' : ''}`}
                                                     style={{ backgroundColor: getColorHex(value) }}
                                                     onClick={() => toggleProperty(name, value)}
                                                     title={value}
@@ -116,7 +211,7 @@ const QuickAddToCart = ({ product, onClose }) => {
                                             ) : (
                                                 <button
                                                     key={idx}
-                                                    className={`py-1 px-2 rounded-lg border border-black ${selectedProperties[name] === value ? 'bg-black text-white' : 'text-black'}`}
+                                                    className={`py-1 px-1.5 text-xs rounded-lg border border-black ${selectedProperties[name] === value ? 'bg-black text-white' : 'text-black'}`}
                                                     onClick={() => toggleProperty(name, value)}
                                                 >
                                                     {value}
