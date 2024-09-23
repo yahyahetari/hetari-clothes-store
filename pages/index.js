@@ -17,6 +17,7 @@ export default function Home({ categories, allProducts, error }) {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
+    const [bannersLoaded, setBannersLoaded] = useState(false);
 
     const productsPerPage = 8;
 
@@ -29,18 +30,48 @@ export default function Home({ categories, allProducts, error }) {
     ];
 
     useEffect(() => {
-        setTimeout(() => {
-            setLoading(false);
-        }, 1000);
+        const preloadImage = (src) => {
+            return new Promise((resolve, reject) => {
+                const img = new window.Image();
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = src;
+            });
+        };
 
-        const bannerInterval = setInterval(() => {
-            setCurrentImageIndex((prevIndex) => (prevIndex + 1) % banners.length);
-        }, 5000);
+        const loadBanners = async () => {
+            try {
+                // Load the first banner
+                await preloadImage(banners[0]);
+
+                // Set loading to false after the first banner is loaded
+                setLoading(false);
+
+                // Load the rest of the banners
+                await Promise.all(banners.slice(1).map(preloadImage));
+
+                // All banners are loaded
+                setBannersLoaded(true);
+            } catch (error) {
+                console.error("Error loading banners:", error);
+                setLoading(false);
+            }
+        };
+
+        loadBanners();
+
+        // Start banner rotation only after all banners are loaded
+        let bannerInterval;
+        if (bannersLoaded) {
+            bannerInterval = setInterval(() => {
+                setCurrentImageIndex((prevIndex) => (prevIndex + 1) % banners.length);
+            }, 5000);
+        }
 
         return () => {
-            clearInterval(bannerInterval);
+            if (bannerInterval) clearInterval(bannerInterval);
         };
-    }, [banners.length]);
+    }, [bannersLoaded]);
 
     const loadMoreProducts = () => {
         setLoadingMore(true);
@@ -55,7 +86,7 @@ export default function Home({ categories, allProducts, error }) {
     };
 
     useEffect(() => {
-        // Load initial 5 products
+        // Load initial products
         setDisplayedProducts(allProducts.slice(0, productsPerPage));
         setPage(2); // Set to 2 because we've already loaded the first page
         setHasMore(allProducts.length > productsPerPage);
@@ -91,14 +122,17 @@ export default function Home({ categories, allProducts, error }) {
             {/* Banner section */}
             <div className="relative w-full h-screen">
                 <div {...handlers} className="relative w-full h-full">
-                    <Image
-                        src={banners[currentImageIndex]}
-                        layout="fill"
-                        objectFit="cover"
-                        alt="Banner image"
-                        className="object-top"
-                        priority
-                    />
+                    {banners.map((banner, index) => (
+                        <Image
+                            key={index}
+                            src={banner}
+                            layout="fill"
+                            objectFit="cover"
+                            alt={`Banner image ${index + 1}`}
+                            className={`object-top transition-opacity duration-500 ${index === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
+                            priority={index === 0}
+                        />
+                    ))}
                     <button
                         onClick={() => changeImage(-1)}
                         className="absolute top-1/2 left-4 transform -translate-y-1/2 text-white bg-black bg-opacity-50 p-2 rounded-full z-10"
@@ -191,29 +225,28 @@ export default function Home({ categories, allProducts, error }) {
 
 export async function getServerSideProps() {
     try {
-      await connectToDB();
-  
-      const categories = await Category.find({ parent: null }).lean();
-  
-      const subcategories = await Category.find({ parent: { $ne: null } }).lean();
-  
-      const allProducts = await Product.find({}).sort({ '_id': -1 }).lean();
-  
-      return {
-        props: {
-          categories: JSON.parse(JSON.stringify(categories)),
-          allProducts: JSON.parse(JSON.stringify(allProducts)),
-        }
-      };
+        await connectToDB();
+
+        const categories = await Category.find({ parent: null }).lean();
+
+        const subcategories = await Category.find({ parent: { $ne: null } }).lean();
+
+        const allProducts = await Product.find({}).sort({ '_id': -1 }).lean();
+
+        return {
+            props: {
+                categories: JSON.parse(JSON.stringify(categories)),
+                allProducts: JSON.parse(JSON.stringify(allProducts)),
+            }
+        };
     } catch (error) {
-      console.error("Error in getServerSideProps:", error);
-      return {
-        props: {
-          categories: [],
-          allProducts: [],
-          error: error.message
-        }
-      };
+        console.error("Error in getServerSideProps:", error);
+        return {
+            props: {
+                categories: [],
+                allProducts: [],
+                error: error.message
+            }
+        };
     }
-  }
-  
+}
