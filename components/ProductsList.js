@@ -30,7 +30,7 @@ export default function ProductsList({ products }) {
   return (
     <div>
       <motion.div 
-        className="flex flex-row mt-4 mb-4 flex-wrap gap-4 justify-center"
+        className="flex flex-row mt-4 mb-4 flex-wrap gap-2 sm:gap-4 justify-center"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
