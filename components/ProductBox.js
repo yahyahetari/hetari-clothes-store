@@ -151,7 +151,7 @@ export default function ProductBox({ _id, title, description, images, price, cat
                 <img
                   src={images[0]}
                   alt="product"
-                  className="w-fit h-[170px] sm:w-[170px] sm:h-[220px] md:w-[180px] md:h-[260px] lg:w-[180px] lg:h-[260px] xl:w-[200px] xl:h-[280px] rounded-md m-1.5 transition-transform duration-300 group-hover:scale-105 bg-white object-cover cursor-pointer"
+                  className="w-[130px] h-[170px] sm:w-[170px] sm:h-[220px] md:w-[180px] md:h-[260px] lg:w-[180px] lg:h-[260px] xl:w-[200px] xl:h-[280px] rounded-md m-1.5 transition-transform duration-300 group-hover:scale-105 bg-white object-cover cursor-pointer"
                   onLoad={() => setIsImageLoaded(true)}
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-95 transition-opacity duration-300">
