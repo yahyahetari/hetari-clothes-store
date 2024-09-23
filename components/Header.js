@@ -1,4 +1,4 @@
-import { useContext, useState, useRef, useEffect } from "react";
+import { useContext, useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import { Menu, Search, UserCircle2, X } from "lucide-react";
 import Link from "next/link";
@@ -23,6 +23,8 @@ export default function Header() {
   const userDropdownRef = useRef(null);
   const menuRef = useRef(null);
   const searchInputRef = useRef(null);
+  const [searchResults, setSearchResults] = useState([]);
+  const debounceTimer = useRef(null);
 
   const handleLinkClick = () => {
     setMenuOpen(false);
@@ -31,6 +33,13 @@ export default function Header() {
   const handleUserDropdown = (event) => {
     event.stopPropagation();
     setUserDropdownOpen(!userDropdownOpen);
+    setMenuOpen(false);
+  };
+
+  const toggleMenu = (event) => {
+    event.stopPropagation();
+    setMenuOpen(!menuOpen);
+    setUserDropdownOpen(false);
   };
 
   useEffect(() => {
@@ -70,7 +79,33 @@ export default function Header() {
     };
   }, [router]);
 
-  const handleSearch = (e) => {
+  const debouncedSearch = useCallback((value) => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    debounceTimer.current = setTimeout(async () => {
+      if (value.trim() !== "") {
+        try {
+          const response = await fetch(`/api/search?q=${encodeURIComponent(value)}`);
+          const data = await response.json();
+          setSearchResults(data.results.map(result => result.title)); // Only store product titles
+        } catch (error) {
+          console.error("Error fetching search results:", error);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    }, 100);
+  }, []);
+
+  const handleSearchInput = (e) => {
+    const value = e.target.value;
+    setQuery(value);
+    debouncedSearch(value);
+  };
+
+  const handleSearch = async (e) => {
     e.preventDefault();
     if (query.trim() !== "") {
       router.push(`/search/${encodeURIComponent(query)}`);
@@ -104,7 +139,7 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white flex items-center justify-between text-lg font-medium text-black p-2">
+    <header className="fixed top-0 left-0 right-0 z-50 shadow-lg bg-white flex items-center justify-between text-lg font-medium text-black p-2">
       <div className="flex items-center w-full md:w-auto">
         <div className="md:hidden flex items-center">
           {session ? (
@@ -134,8 +169,7 @@ export default function Header() {
               <UserCircle2 className="w-8 h-8 mr-3" />
             </Link>
           )}
-          <Menu onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }} className="cursor-pointer mr-3" />
-
+          <Menu onClick={toggleMenu} className="cursor-pointer mr-3" />
         </div>
         <div className="flex-grow flex justify-center md:justify-start">
           <Link href='/'>
@@ -218,19 +252,34 @@ export default function Header() {
       )}
 
       {searchOpen && (
-        <div className="absolute inset-0 bg-white z-50 flex items-center">
+        <div className="absolute inset-0 bg-white z-50 flex flex-col">
           <form onSubmit={handleSearch} className="w-full flex items-center px-4">
             <input
               ref={searchInputRef}
               className="w-full h-full px-4 py-2 outline-none"
               placeholder="Search..."
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={handleSearchInput}
             />
-            <button type="button" onClick={toggleSearch} className="p-2">
+            <button type="button" onClick={() => setSearchOpen(false)} className="p-7">
               <X className="h-6 w-6" />
             </button>
           </form>
+          {query.trim() !== "" && searchResults.length > 0 && (
+            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 shadow-lg max-h-60 overflow-y-auto"
+              style={{ maxHeight: `${Math.min(searchResults.length * 40, 240)}px` }}>
+              {searchResults.map((result, index) => (
+                <Link
+                  key={index}
+                  href={`/search/${encodeURIComponent(result)}`}
+                  className="block px-4 py-2 hover:bg-gray-100"
+                  onClick={() => setSearchOpen(false)}
+                >
+                  {result}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </header>
