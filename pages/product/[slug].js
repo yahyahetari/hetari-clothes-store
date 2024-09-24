@@ -226,6 +226,7 @@ export default function ProductPage({ product, sameSubcategoryProducts, otherSub
 
             {/* Full Ratings and Reviews Section */}
             <RatingsAndReviews
+                key={product._id}
                 productId={product._id}
                 initialRatings={ratings}
             />
