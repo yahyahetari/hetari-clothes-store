@@ -75,13 +75,15 @@ const RatingsAndReviews = ({ productId, initialRatings = [] }) => {
                 className="flex justify-between items-center cursor-pointer" 
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                <div className="flex items-center">
-                    <h2 className="text-2xl font-semibold mr-4">Ratings and Reviews</h2>
+                 <div className="flex items-center">
+                    <h2 className="text-base sm:text-2xl font-semibold mr-4">Ratings and Reviews</h2>
                     {!isExpanded && (
                         <div className="flex items-center">
                             <span className="text-xl font-bold mr-2">{averageRating.toFixed(1)}</span>
                             <RatingStars rating={averageRating} size="w-4 h-4" />
-                            <span className="ml-2 text-sm text-gray-500">({ratings.length} ratings)</span>
+                            <span className="ml-2 text-sm text-gray-500">
+                                ({ratings.length}<span className="hidden sm:inline">ratings</span>)
+                                </span>
                         </div>
                     )}
                 </div>
