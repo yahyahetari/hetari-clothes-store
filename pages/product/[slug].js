@@ -4,7 +4,7 @@ import Gallery from "@/components/Gallery";
 import { connectToDB } from "@/lib/mongoose";
 import { Product } from "@/models/Products";
 import { Category } from "@/models/Category";
-import { MinusCircle, PlusCircle } from "lucide-react";
+import { MinusCircle, PlusCircle, Star } from "lucide-react";
 import Loader from "@/components/Loader";
 import ProductsList from "@/components/ProductsList";
 import RatingsAndReviews from "@/components/RatingsAndReviews";
@@ -66,7 +66,6 @@ export default function ProductPage({ product, sameSubcategoryProducts, otherSub
             const initialSelected = {};
             Object.entries(product.properties).forEach(([name, values]) => {
                 if (Array.isArray(values) && values.length > 0) {
-                    // Sort size values if the property name includes 'size' or 'مقاس'
                     if (isSizeProperty(name)) {
                         values = sortSizeValues(values);
                     }
@@ -77,14 +76,12 @@ export default function ProductPage({ product, sameSubcategoryProducts, otherSub
         }
         setLoading(false);
 
-        // Combine and prepare initial visible products
         const initialProducts = [...sameSubcategoryProducts];
         if (initialProducts.length < 5) {
             initialProducts.push(...otherSubcategoryProducts.slice(0, 5 - initialProducts.length));
         }
         setVisibleProducts(initialProducts.slice(0, 5));
 
-        // Check if there are more products to show
         setShowMoreButton(sameSubcategoryProducts.length + otherSubcategoryProducts.length > 5);
     }, [product.properties, sameSubcategoryProducts, otherSubcategoryProducts]);
 
@@ -130,6 +127,11 @@ export default function ProductPage({ product, sameSubcategoryProducts, otherSub
         }
     };
 
+    const ratings = product.ratings || [];
+    const averageRating = ratings.length > 0
+        ? ratings.reduce((sum, rating) => sum + rating.rating, 0) / ratings.length
+        : 0;
+
     return (
         <div className="max-w-6xl mx-auto p-4 flex flex-col gap-6">
             <div className="flex flex-col md:flex-row gap-6">
@@ -139,6 +141,20 @@ export default function ProductPage({ product, sameSubcategoryProducts, otherSub
                 <div className="flex-grow md:w-1/2 flex flex-col gap-4">
                     <div>
                         <h1 className="text-2xl font-semibold">{product.title}</h1>
+                        {/* Add the compact rating display here */}
+                        <div className="flex items-center mt-2">
+                            <span className="text-xl font-bold mr-2">{averageRating.toFixed(1)}</span>
+                            <div className="flex">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star
+                                        key={star}
+                                        className={`w-4 h-4 ${star <= Math.round(averageRating) ? 'text-yellow-400' : 'text-gray-300'}`}
+                                        fill={star <= Math.round(averageRating) ? 'currentColor' : 'none'}
+                                    />
+                                ))}
+                            </div>
+                            <span className="ml-2 text-sm text-gray-500">({ratings.length} ratings)</span>
+                        </div>
                         <p className="text-xl font-semibold mt-2">$ {product.price}</p>
                     </div>
                     <p className="text-lg">{product.description}</p>
@@ -208,10 +224,10 @@ export default function ProductPage({ product, sameSubcategoryProducts, otherSub
                 </div>
             </div>
 
-            {/* Ratings and Reviews Section */}
+            {/* Full Ratings and Reviews Section */}
             <RatingsAndReviews
                 productId={product._id}
-                initialRatings={product.ratings || []}
+                initialRatings={ratings}
             />
 
             {/* Related Products Section */}
