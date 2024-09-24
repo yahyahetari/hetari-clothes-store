@@ -72,7 +72,7 @@ const RatingsAndReviews = ({ productId, initialRatings = [] }) => {
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="flex items-center">
-                    <h2 className="text-lg sm:text-2xl font-semibold mr-4">Ratings and Reviews</h2>
+                    <h2 className="text-base sm:text-2xl font-semibold mr-4">Ratings and Reviews</h2>
                     {!isExpanded && (
                         <div className="flex items-center">
                             <span className="text-xl font-bold mr-2">{averageRating.toFixed(1)}</span>
