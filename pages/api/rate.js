@@ -36,9 +36,11 @@ export default async function handler(req, res) {
 
     product.ratings.push({
       ...rating,
-      user: session.user.email,
-      userName: session.user.name,
-      userImage: session.user.image,
+      user: {
+        email: session.user.email,
+        name: session.user.name,
+        image: session.user.image,
+      }
     });
     await product.save();
 

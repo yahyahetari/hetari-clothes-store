@@ -22,7 +22,11 @@ const RatingsAndReviews = ({ productId, initialRatings = [] }) => {
             const newRatingObject = {
                 rating: newRating,
                 review: newReview,
-                user: session.user.email,
+                user: {
+                    name: session.user.name,
+                    email: session.user.email,
+                    image: session.user.image
+                },
             };
 
             try {
@@ -72,14 +76,12 @@ const RatingsAndReviews = ({ productId, initialRatings = [] }) => {
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="flex items-center">
-                    <h2 className="text-base sm:text-2xl font-semibold mr-4">Ratings and Reviews</h2>
+                    <h2 className="text-2xl font-semibold mr-4">Ratings and Reviews</h2>
                     {!isExpanded && (
                         <div className="flex items-center">
                             <span className="text-xl font-bold mr-2">{averageRating.toFixed(1)}</span>
                             <RatingStars rating={averageRating} size="w-4 h-4" />
-                            <span className="ml-2 text-sm text-gray-500">
-                                ({ratings.length}<span className="hidden sm:inline">ratings</span>)
-                                </span>
+                            <span className="ml-2 text-sm text-gray-500">({ratings.length} ratings)</span>
                         </div>
                     )}
                 </div>
@@ -97,16 +99,16 @@ const RatingsAndReviews = ({ productId, initialRatings = [] }) => {
                         {ratings.map((item, index) => (
                             <div key={index} className="mb-4 bg-white p-3 rounded-lg">
                                 <div className="flex items-center mb-2">
-                                    {session && session.user && session.user.image && (
+                                    {item.user && item.user.image && (
                                         <Image
-                                            src={session.user.image}
-                                            alt="User"
+                                            src={item.user.image}
+                                            alt={item.user.name || 'User'}
                                             width={20}
                                             height={20}
                                             className="rounded-full mr-2"
                                         />
                                     )}
-                                    <span className="font-normal text-sm ">{session?.user?.name || 'Anonymous'}</span>
+                                    <span className="font-normal text-sm ">{item.user?.name || 'Anonymous'}</span>
                                 </div>
                                 <div className="flex items-center mb-2">
                                     <RatingStars rating={item.rating} size="w-4 h-4" />

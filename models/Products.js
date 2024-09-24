@@ -12,6 +12,11 @@ const ProductSchema = new Schema({
   ratings: [{
     rating: Number,
     review: String,
+    user: {
+      name: String,
+      email: String,
+      image: String
+    },
     createdAt: { type: Date, default: Date.now }
   }],
 }, {
@@ -33,14 +38,12 @@ ProductSchema.pre('save', async function(next) {
     let slug = baseSlug;
     let counter = 1;
     
-    // التحقق من وجود slug مماثل والتعديل إذا لزم الأمر
     while (true) {
       const existingProduct = await this.constructor.findOne({ slug: slug });
       if (!existingProduct) {
         this.slug = slug;
         break;
       }
-      // إذا وجد slug مماثل، أضف رقم تسلسلي
       slug = `${baseSlug}-${counter}`;
       counter++;
     }

@@ -140,7 +140,7 @@ export default function ProductPage({ product, sameSubcategoryProducts, otherSub
                 </div>
                 <div className="flex-grow md:w-1/2 flex flex-col gap-4">
                     <div>
-                        <h1 className="text-2xl font-semibold">{product.title}</h1>
+                        <h1 className="text-lg sm:text-2xl font-semibold">{product.title}</h1>
                         {/* Add the compact rating display here */}
                         <div className="flex items-center mt-2">
                             <span className="text-xl font-bold mr-2">{averageRating.toFixed(1)}</span>
@@ -157,7 +157,7 @@ export default function ProductPage({ product, sameSubcategoryProducts, otherSub
                         </div>
                         <p className="text-xl font-semibold mt-2">$ {product.price}</p>
                     </div>
-                    <p className="text-lg">{product.description}</p>
+                    <p className="text-base sm:text-lg">{product.description}</p>
 
                     {hasProperties && (
                         <div className="">
@@ -232,7 +232,7 @@ export default function ProductPage({ product, sameSubcategoryProducts, otherSub
 
             {/* Related Products Section */}
             <div>
-                <h2 className="text-2xl font-semibold mb-4">Related Products</h2>
+                <h2 className="text-lg sm:text-2xl font-semibold mb-4">Related Products</h2>
 
                 {visibleProducts.length > 0 && (
                     <div className=" text-center">
