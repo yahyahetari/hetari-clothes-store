@@ -237,7 +237,7 @@ export default function Header() {
       </div>
 
       {menuOpen && (
-        <div ref={menuRef} className="absolute top-20 left-0 w-full p-4 bg-white flex flex-col items-center gap-4 md:hidden z-50">
+        <div ref={menuRef} className="absolute top-20 left-0 w-full p-4 shadow-lg bg-white flex flex-col items-center gap-4 md:hidden z-50">
           {navLinks.map((link) => (
             <div key={link.label} className="w-full text-center">
               <Link href={link.url || "#"}

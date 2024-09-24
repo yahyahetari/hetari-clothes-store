@@ -1,8 +1,8 @@
-import { useContext, useEffect, useState } from "react";
-import { CartContext } from "./CartContext";
+import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import QuickAddToCart from "./QuickAddToCart";
+import { Star } from "lucide-react";
 
 const getColorHex = (colorName) => {
   const colors = {
@@ -44,8 +44,7 @@ const truncateText = (text, maxLength) => {
   return text.slice(0, maxLength - 3) + '...';
 };
 
-export default function ProductBox({ _id, title, description, images, price, category, properties, product, slug }) {
-  const { addToCart } = useContext(CartContext);
+export default function ProductBox({ _id, title, description, images, price, category, properties, product, slug ,ratings }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
 
@@ -69,6 +68,29 @@ export default function ProductBox({ _id, title, description, images, price, cat
   const handleAddToCart = () => {
     setShowQuickAdd(true);
   };
+
+  const averageRating = ratings && ratings.length > 0
+  ? ratings.reduce((sum, item) => sum + item.rating, 0) / ratings.length
+  : 0;
+  
+  const showRating = averageRating >= 3.5;
+
+  const RatingStars = ({ rating, size = 'w-4 h-4' }) => {
+    if (!showRating) return null;
+    
+    return (
+      <div className="flex items-center mb-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`${size} ${star <= Math.round(rating) ? 'text-yellow-400' : 'text-gray-300'}`}
+            fill={star <= Math.round(rating) ? 'currentColor' : 'none'}
+          />
+        ))}
+      </div>
+    );
+  }; 
+
 
   const shimmerEffect = {
     hidden: { x: '-100%' },
@@ -163,6 +185,7 @@ export default function ProductBox({ _id, title, description, images, price, cat
               <p className="text-sm sm:text-base font-semibold" title={title}>
                 {truncateText(title, 17)}
               </p>
+              <RatingStars rating={averageRating} />
               <div className="text-sm flex flex-wrap -mb-2.5 gap-0.5 flex-grow relative">
                 {displayedValues.map((value, index) => (
                   <span key={index}>{value}</span>
