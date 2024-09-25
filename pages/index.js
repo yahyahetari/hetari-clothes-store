@@ -120,8 +120,8 @@ export default function Home({ categories, allProducts, error }) {
     return (
         <div className="min-h-screen bg-gray-100">
             {/* Banner section */}
-            <div className="relative w-full h-screen">
-                <div {...handlers} className="relative w-full h-full">
+            <div className="relative w-full h-[50vh] md:h-[60vh] lg:h-[70vh] xl:h-screen">
+            <div {...handlers} className="relative w-full h-full">
                     {banners.map((banner, index) => (
                         <Image
                             key={index}
