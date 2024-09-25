@@ -1,8 +1,7 @@
 import { useState, useContext, useEffect } from 'react';
 import { CartContext } from './CartContext';
 import { motion } from 'framer-motion';
-import { FaTimes } from 'react-icons/fa';
-import { MinusCircle, PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MinusCircle, PlusCircle, ChevronLeft, ChevronRight, X, Star } from 'lucide-react';
 import Image from 'next/image';
 import { useSwipeable } from 'react-swipeable';
 
@@ -33,7 +32,7 @@ const sortSizeValues = (values) => {
 const isSizeProperty = (name) => name.toLowerCase().includes('size') || name.includes('مقاس');
 const isColorProperty = (name) => name.toLowerCase() === "color" || name.toLowerCase() === "لون";
 
-const QuickAddToCart = ({ product, onClose }) => {
+const QuickAddToCart = ({ product, onClose, ratings }) => {
     const { addToCart } = useContext(CartContext);
     const [selectedProperties, setSelectedProperties] = useState({});
     const [quantity, setQuantity] = useState(1);
@@ -100,6 +99,29 @@ const QuickAddToCart = ({ product, onClose }) => {
         onClose();
     };
 
+    const averageRating = ratings && ratings.length > 0
+    ? ratings.reduce((sum, item) => sum + item.rating, 0) / ratings.length
+    : 0;
+    
+    const showRating = averageRating >= 3.5;
+  
+    const RatingStars = ({ rating, size = 'w-4 h-4' }) => {
+      if (!showRating) return null;
+      
+      return (
+        <div className="flex items-center justify-center mb-1">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+              key={star}
+              className={`${size} ${star <= Math.round(rating) ? 'text-yellow-400' : 'text-gray-300'}`}
+              fill={star <= Math.round(rating) ? 'currentColor' : 'none'}
+            />
+          ))}
+        </div>
+      );
+    }; 
+  
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -112,18 +134,18 @@ const QuickAddToCart = ({ product, onClose }) => {
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 50, opacity: 0 }}
-                className="bg-white p-2 m-2 rounded-lg max-w-xl w-full relative"
+                className="bg-white p-2 mt-10 mb-10 rounded-lg max-w-xl w-1/2 sm:w-2/3 relative"
                 onClick={e => e.stopPropagation()}
             >
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
-                    <FaTimes />
+                <button onClick={onClose} className="absolute -top-3 -right-3 rounded-full bg-black text-gray-200 hover:text-gray-700">
+                    <X />
                 </button>
 
-                <div className="flex flex-row">
-                    <div className="md:w-1/2 pr-4">
-                        <div {...handlers} className="relative w-full">
-                            {isLoading ? (
-                                <div className="w-full h-[400px] bg-gray-300 rounded-lg relative overflow-hidden">
+                <div className="flex flex-col sm:flex-row">
+                <div className="w-full sm:w-1/2 ">
+                <div {...handlers} className="relative w-full  justify-center block">
+                    {isLoading ? (
+                                <div className="w-full h-[300px] bg-gray-300 rounded-lg relative overflow-hidden">
                                     <motion.div
                                         className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent"
                                         initial="hidden"
@@ -139,7 +161,7 @@ const QuickAddToCart = ({ product, onClose }) => {
                                     width={500}
                                     height={400}
                                     alt="Main product image"
-                                    className="rounded-lg shadow-xl object-cover w-full h-80"
+                                    className="rounded-lg shadow-xl object-cover  w-64 sm:w-full sm:h-80 mx-auto"
                                 />
                             )}
                             <button
@@ -161,7 +183,7 @@ const QuickAddToCart = ({ product, onClose }) => {
                             </div>
                         </div>
 
-                        <div className="hidden md:flex gap-2 overflow-auto mt-2">
+                        <div className="hidden sm:flex gap-2 overflow-auto mt-2">
                             {product.images.map((image, index) => (
                                 <div key={index} className="relative w-20 h-20">
                                     {isLoading ? (
@@ -190,20 +212,21 @@ const QuickAddToCart = ({ product, onClose }) => {
                         </div>
                     </div>
 
-                    <div className="md:w-1/2 mt-4">
-                        <h2 className="text-xl font-bold">{product.title}</h2>
-                        <p className="text-lg font-semibold">$ {product.price}</p>
+                    <div className="w-full sm:w-1/2 mt-4 sm:mt-0">
+                        <h2 className="text-xl text-center font-bold">{product.title}</h2>
+                        <RatingStars rating={averageRating} />
+                        <p className="text-lg text-center font-semibold">$ {product.price}</p>
 
                         {product.properties && Object.entries(product.properties).map(([name, values]) => (
                             Array.isArray(values) && values.length > 0 && (
                                 <div key={name} className="mb-2">
-                                    <p className="text-base font-semibold">{name} :</p>
-                                    <div className="flex flex-wrap gap-2">
+                                    <p className="text-base text-center font-semibold">{name} :</p>
+                                    <div className="flex flex-wrap justify-center gap-2">
                                         {(isSizeProperty(name) ? sortSizeValues([...values]) : values).map((value, idx) => (
                                             isColorProperty(name) ? (
                                                 <button
                                                     key={idx}
-                                                    className={`w-5 h-5 rounded-full border border-black ${selectedProperties[name] === value ? 'ring-2 ring-offset-2 ring-black' : ''}`}
+                                                    className={`w-5 h-5 sm:h-7 sm:w-7 rounded-full border border-black ${selectedProperties[name] === value ? 'ring-2 ring-offset-2 ring-black' : ''}`}
                                                     style={{ backgroundColor: getColorHex(value) }}
                                                     onClick={() => toggleProperty(name, value)}
                                                     title={value}
@@ -211,7 +234,7 @@ const QuickAddToCart = ({ product, onClose }) => {
                                             ) : (
                                                 <button
                                                     key={idx}
-                                                    className={`py-1 px-1.5 text-xs rounded-lg border border-black ${selectedProperties[name] === value ? 'bg-black text-white' : 'text-black'}`}
+                                                    className={`py-1 px-1.5 text-xs sm:text-base rounded-lg border border-black ${selectedProperties[name] === value ? 'bg-black text-white' : 'text-black'}`}
                                                     onClick={() => toggleProperty(name, value)}
                                                 >
                                                     {value}
@@ -223,7 +246,7 @@ const QuickAddToCart = ({ product, onClose }) => {
                             )
                         ))}
 
-                        <div className="flex items-center mt-4">
+                        <div className="flex items-center justify-center mt-4">
                             <MinusCircle
                                 className="hover:text-red-700 cursor-pointer"
                                 onClick={decreaseQuantity}
@@ -235,19 +258,21 @@ const QuickAddToCart = ({ product, onClose }) => {
                             />
                         </div>
 
-                        <button
-                            onClick={handleAddToCart}
-                            className="bg-black font-medium text-xl text-white rounded-lg mt-4 py-2 w-full flex items-center justify-center"
-                        >
-                            <span className="hidden md:inline">Add To Cart</span>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="w-6 h-6 icon-white md:ml-3"
-                                viewBox="0 0 576 512"
+                        <div className="flex justify-center w-full">
+                            <button
+                                onClick={handleAddToCart}
+                                className="bg-black font-medium text-xl text-white rounded-lg mt-4 py-2 w-3/4 flex items-center justify-center"
                             >
-                                <path d="M0 24C0 10.7 10.7 0 24 0L69.5 0c22 0 41.5 12.8 50.6 32l411 0c26.3 0 45.5 25 38.6 50.4l-41 152.3c-8.5 31.4-37 53.3-69.5 53.3l-288.5 0 5.4 28.5c2.2 11.3 12.1 19.5 23.6 19.5L488 336c13.3 0 24 10.7 24 24s-10.7 24-24 24l-288.3 0c-34.6 0-64.3-24.6-70.7-58.5L77.4 54.5c-.7-3.8-4-6.5-7.9-6.5L24 48C10.7 48 0 37.3 0 24zM128 464a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm336-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96zM252 160c0 11 9 20 20 20l44 0 0 44c0 11 9 20 20 20s20-9 20-20l0-44 44 0c11 0 20-9 20-20s-9-20-20-20l-44 0 0-44c0-11-9-20-20-20s-20 9-20 20l0 44-44 0c-11 0-20 9-20 20z" />
-                            </svg>
-                        </button>
+                                <span className="hidden sm:inline">Add To Cart</span>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="w-6 h-6 icon-white sm:ml-3"
+                                    viewBox="0 0 576 512"
+                                >
+                                    <path d="M0 24C0 10.7 10.7 0 24 0L69.5 0c22 0 41.5 12.8 50.6 32l411 0c26.3 0 45.5 25 38.6 50.4l-41 152.3c-8.5 31.4-37 53.3-69.5 53.3l-288.5 0 5.4 28.5c2.2 11.3 12.1 19.5 23.6 19.5L488 336c13.3 0 24 10.7 24 24s-10.7 24-24 24l-288.3 0c-34.6 0-64.3-24.6-70.7-58.5L77.4 54.5c-.7-3.8-4-6.5-7.9-6.5L24 48C10.7 48 0 37.3 0 24zM128 464a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm336-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96zM252 160c0 11 9 20 20 20l44 0 0 44c0 11 9 20 20 20s20-9 20-20l0-44 44 0c11 0 20-9 20-20s-9-20-20-20l-44 0 0-44c0-11-9-20-20-20s-20 9-20 20l0 44-44 0c-11 0-20 9-20 20z" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </motion.div>

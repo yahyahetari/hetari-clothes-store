@@ -167,7 +167,7 @@ export default function Home({ categories, allProducts, error }) {
                             {categories.map((category) => (
                                 <Link href={`/category/${category.slug}`} key={category._id}>
                                     <div className="flex flex-col items-center cursor-pointer">
-                                        <div className="w-24 h-24 border-gray-500 border bg-gray-200 rounded-full overflow-hidden mb-2">
+                                        <div className="w-20 h-20 sm:h-24 sm:w-24 border-gray-500 border bg-gray-200 rounded-full overflow-hidden mb-2">
                                             {category.image ? (
                                                 <Image
                                                     src={category.image}

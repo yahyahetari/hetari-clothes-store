@@ -223,9 +223,10 @@ export default function ProductBox({ _id, title, description, images, price, cat
       <AnimatePresence>
         {showQuickAdd && (
           <QuickAddToCart
-            product={{ _id, title, images, price, properties }}
-            onClose={() => setShowQuickAdd(false)}
-          />
+          product={{ _id, title, images, price, properties }}
+          onClose={() => setShowQuickAdd(false)}
+          ratings={ratings}
+        />        
         )}
       </AnimatePresence>
     </>
