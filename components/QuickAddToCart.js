@@ -145,7 +145,7 @@ const QuickAddToCart = ({ product, onClose, ratings }) => {
                 <div className="w-full sm:w-1/2 ">
                 <div {...handlers} className="relative w-full  justify-center block">
                     {isLoading ? (
-                                <div className="w-full h-[250px] sm:h-[300px] bg-gray-300 rounded-lg relative overflow-hidden">
+                                <div className="w-full h-[280px] sm:h-[300px] bg-gray-300 rounded-lg relative overflow-hidden">
                                     <motion.div
                                         className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent"
                                         initial="hidden"
