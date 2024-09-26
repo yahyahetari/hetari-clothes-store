@@ -134,7 +134,7 @@ const QuickAddToCart = ({ product, onClose, ratings }) => {
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 50, opacity: 0 }}
-                className="bg-white p-2 mt-10 mb-10 rounded-lg max-w-xl w-1/2 sm:w-2/3 relative"
+                className="bg-white p-2 mt-10 mb-10 rounded-lg max-w-xl w-3/5 sm:w-2/3 relative"
                 onClick={e => e.stopPropagation()}
             >
                 <button onClick={onClose} className="absolute -top-3 -right-3 rounded-full bg-black text-gray-200 hover:text-gray-700">
@@ -145,7 +145,7 @@ const QuickAddToCart = ({ product, onClose, ratings }) => {
                 <div className="w-full sm:w-1/2 ">
                 <div {...handlers} className="relative w-full  justify-center block">
                     {isLoading ? (
-                                <div className="w-full h-[300px] bg-gray-300 rounded-lg relative overflow-hidden">
+                                <div className="w-full h-[200px] sm:h-[300px] bg-gray-300 rounded-lg relative overflow-hidden">
                                     <motion.div
                                         className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent"
                                         initial="hidden"
