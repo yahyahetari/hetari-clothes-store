@@ -16,7 +16,7 @@ const getColorHex = (colorName) => {
   return colors[colorName.toLowerCase()] || colorName;
 };
 
-const formatPropertyValue = (key, value, hasColor) => {
+const formatPropertyValue = (key, value) => {
   const isColor = key.toLowerCase() === "color" || key.toLowerCase() === "لون";
 
   if (isColor) {
@@ -32,11 +32,7 @@ const formatPropertyValue = (key, value, hasColor) => {
     );
   }
 
-  if (hasColor && !isColor) {
-    return null;
-  }
-
-  return value;
+  return null;
 };
 
 const truncateText = (text, maxLength) => {
@@ -44,7 +40,7 @@ const truncateText = (text, maxLength) => {
   return text.slice(0, maxLength - 3) + '...';
 };
 
-export default function ProductBox({ _id, title, description, images, price, category, properties, product, slug ,ratings }) {
+export default function ProductBox({ _id, title, description, images, price, category, properties, product, slug, ratings }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
 
@@ -56,7 +52,7 @@ export default function ProductBox({ _id, title, description, images, price, cat
 
   let displayedValues = propertyEntries.flatMap(([key, value]) => {
     const values = Array.isArray(value) ? value : [value];
-    return values.map(v => formatPropertyValue(key, v.trim(), hasColor)).filter(Boolean);
+    return values.map(v => formatPropertyValue(key, v.trim())).filter(Boolean);
   });
 
   let additionalColorsCount = 0;
@@ -70,8 +66,8 @@ export default function ProductBox({ _id, title, description, images, price, cat
   };
 
   const averageRating = ratings && ratings.length > 0
-  ? ratings.reduce((sum, item) => sum + item.rating, 0) / ratings.length
-  : 0;
+    ? ratings.reduce((sum, item) => sum + item.rating, 0) / ratings.length
+    : 0;
   
   const showRating = averageRating >= 3.5;
 
@@ -89,8 +85,7 @@ export default function ProductBox({ _id, title, description, images, price, cat
         ))}
       </div>
     );
-  }; 
-
+  };
 
   const shimmerEffect = {
     hidden: { x: '-100%' },
@@ -186,16 +181,18 @@ export default function ProductBox({ _id, title, description, images, price, cat
                 {truncateText(title, 17)}
               </p>
               <RatingStars rating={averageRating} />
-              <div className="text-sm flex flex-wrap -mb-2.5 gap-0.5 flex-grow relative">
-                {displayedValues.map((value, index) => (
-                  <span key={index}>{value}</span>
-                ))}
-                {additionalColorsCount > 0 && (
-                  <span className="text-sm text-gray-800  absolute -top-1 right-6 sm:right-16 md:right-20 lg:right-16 xl:right-20 ">
-                    +{additionalColorsCount}
-                  </span>
-                )}
-              </div>
+              {hasColor && (
+                <div className="text-sm flex flex-wrap -mb-2.5 gap-0.5 flex-grow relative">
+                  {displayedValues.map((value, index) => (
+                    <span key={index}>{value}</span>
+                  ))}
+                  {additionalColorsCount > 0 && (
+                    <span className="text-sm text-gray-800 absolute -top-1 right-6 sm:right-16 md:right-20 lg:right-16 xl:right-20">
+                      +{additionalColorsCount}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
             <div className="pl-2 flex justify-between items-center mt-auto pb-2">
               <p className="font-bold">$ {price}</p>
@@ -223,10 +220,10 @@ export default function ProductBox({ _id, title, description, images, price, cat
       <AnimatePresence>
         {showQuickAdd && (
           <QuickAddToCart
-          product={{ _id, title, images, price, properties }}
-          onClose={() => setShowQuickAdd(false)}
-          ratings={ratings}
-        />        
+            product={{ _id, title, images, price, properties }}
+            onClose={() => setShowQuickAdd(false)}
+            ratings={ratings}
+          />        
         )}
       </AnimatePresence>
     </>

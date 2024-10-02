@@ -60,6 +60,18 @@ export async function getServerSideProps({ params, query: urlQuery }) {
 
   const allCategories = await Category.find({});
 
+  function normalizeColor(color) {
+    // Remove any extra spaces and convert to lowercase
+    color = color.trim();
+    
+    // Handle compound colors
+    if (color === 'navy blue') return 'navy';
+    if (color === 'light blue') return 'lightblue';
+    // Add more compound color handling as needed
+    
+    return color;
+  }
+  
   const allProperties = {};
   uniqueProducts.forEach(product => {
     if (product.properties) {
@@ -67,18 +79,28 @@ export async function getServerSideProps({ params, query: urlQuery }) {
         if (!allProperties[key]) {
           allProperties[key] = new Set();
         }
-        if (Array.isArray(value)) {
-          value.forEach(v => allProperties[key].add(v));
+        if (key.toLowerCase() === 'color' || key.toLowerCase() === 'colors') {
+          if (Array.isArray(value)) {
+            value.forEach(v => allProperties[key].add(normalizeColor(v)));
+          } else {
+            allProperties[key].add(normalizeColor(value));
+          }
         } else {
-          allProperties[key].add(value);
+          if (Array.isArray(value)) {
+            value.forEach(v => allProperties[key].add(v));
+          } else {
+            allProperties[key].add(value);
+          }
         }
       });
     }
   });
-
+  
+  // Convert Sets to Arrays and sort them
   Object.keys(allProperties).forEach(key => {
-    allProperties[key] = Array.from(allProperties[key]);
+    allProperties[key] = Array.from(allProperties[key]).sort();
   });
+  
 
   return {
     props: {
@@ -142,43 +164,62 @@ export default function SearchPage({ searchedProducts, query, categories, proper
 
   const applyFilters = () => {
     setLoading(true);
-
+  
     let filtered = searchedProducts.filter(product => {
       if (currentFilters.minPrice !== '' && product.price < Number(currentFilters.minPrice)) return false;
       if (currentFilters.maxPrice !== '' && product.price > Number(currentFilters.maxPrice)) return false;
-
+  
       if (currentFilters.category && currentFilters.category.length > 0) {
         if (!currentFilters.category.includes(product.category)) return false;
       }
-
+  
       for (const [key, values] of Object.entries(currentFilters)) {
         if (key.startsWith('property_') && values.length > 0) {
           const propertyName = key.replace('property_', '');
-          if (!product.properties || !product.properties[propertyName] ||
-            (Array.isArray(product.properties[propertyName])
-              ? !product.properties[propertyName].some(v => values.includes(v))
-              : !values.includes(product.properties[propertyName]))) {
+          if (!product.properties || !product.properties[propertyName]) return false;
+          
+          let productValue = product.properties[propertyName];
+          if (propertyName.toLowerCase() === 'color') {
+            productValue = Array.isArray(productValue) 
+              ? productValue.map(normalizeColor) 
+              : [normalizeColor(productValue)];
+          } else {
+            productValue = Array.isArray(productValue) ? productValue : [productValue];
+          }
+          
+          if (!values.some(value => 
+            productValue.some(pValue => 
+              pValue.toString().toLowerCase() === value.toString().toLowerCase()
+            )
+          )) {
             return false;
           }
         }
       }
-
+  
       return true;
     });
-
+  
     if (sortOrder === 'asc') {
       filtered.sort((a, b) => a.price - b.price);
     } else if (sortOrder === 'desc') {
       filtered.sort((a, b) => b.price - a.price);
     }
-
+  
     setFilteredProducts(filtered);
     setLoading(false);
     setShowFilters(false);
   };
+  
 
   const handleSortChange = (order) => {
-    setSortOrder(order);
+    if (sortOrder === order) {
+      // إذا تم النقر على نفس الخيار، قم بإلغاء الاختيار
+      setSortOrder(null);
+    } else {
+      // إذا تم اختيار خيار جديد، قم بتعيينه
+      setSortOrder(order);
+    }
     setCurrentFilters(prev => ({ ...prev, sortOrder: order }));
   };
 
@@ -317,20 +358,20 @@ export default function SearchPage({ searchedProducts, query, categories, proper
                   <div className="space-y-2 mt-2">
                     <label className="flex items-center text-base text-white">
                       <input
-                        type="radio"
+                        type="checkbox"
                         checked={sortOrder === 'asc'}
                         onChange={() => handleSortChange('asc')}
-                        className="mr-2 "
+                        className="mr-2"
                       />
-                      <FaSortAmountUp className="mr-2 text-sm"                      />
+                      <FaSortAmountUp className="mr-2 text-sm" />
                       Price: Low to High
                     </label>
                     <label className="flex items-center text-base text-white">
                       <input
-                        type="radio"
+                        type="checkbox"
                         checked={sortOrder === 'desc'}
                         onChange={() => handleSortChange('desc')}
-                        className="mr-2 "
+                        className="mr-2"
                       />
                       <FaSortAmountDown className="mr-2 text-sm" />
                       Price: High to Low
@@ -343,7 +384,7 @@ export default function SearchPage({ searchedProducts, query, categories, proper
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={applyFilters}
-                className="w-full bg-accent text-teal-800 text-xl font-bold  p-2 rounded-lg hover:bg-accent-dark transition"
+                className="w-full bg-accent text-teal-800 text-xl font-bold p-2 rounded-lg hover:bg-accent-dark transition"
               >
                 Apply Filters
               </motion.button>

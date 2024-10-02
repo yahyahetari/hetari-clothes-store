@@ -137,7 +137,7 @@ const QuickAddToCart = ({ product, onClose, ratings }) => {
                 className="bg-white p-2 mt-10 mb-10 rounded-lg max-w-xl w-3/5 sm:w-2/3 relative"
                 onClick={e => e.stopPropagation()}
             >
-                <button onClick={onClose} className="absolute -top-3 -right-3 rounded-full bg-black text-gray-200 hover:text-gray-700">
+                <button onClick={onClose} className="absolute -top-3 -right-3 rounded-full bg-black text-gray-200 hover:text-red-600">
                     <X />
                 </button>
 
