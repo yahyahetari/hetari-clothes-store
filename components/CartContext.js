@@ -27,18 +27,13 @@ export function CartContextProvider({ children }) {
         toast.success(`${quantity} item${quantity > 1 ? 's' : ''} added to cart`);
       }
 
-    function removeFromCart(productId, properties) {
-        setCart(prev => prev.filter(item => !(item.id === productId && JSON.stringify(item.properties) === JSON.stringify(properties))));
-        toast.success('Product removed from cart', { icon: "🗑️" });
-    }
-
     function clearCart() {
         setCart([]);
         ls?.removeItem('cart');
     }
 
     return (
-        <CartContext.Provider value={{ cart, setCart, addToCart, removeFromCart, clearCart }}>
+        <CartContext.Provider value={{ cart, setCart, addToCart, clearCart }}>
             {children}
         </CartContext.Provider>
     );

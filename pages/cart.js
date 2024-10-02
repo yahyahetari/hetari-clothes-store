@@ -6,13 +6,17 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import Loader from "@/components/Loader";
 import Link from "next/link";
+import TransparentLoader from '@/components/TransparentLoader';
+import CountUp from 'react-countup';
 
 export default function Cart() {
     const router = useRouter();
-    const { cart, addToCart, setCart, removeFromCart } = useContext(CartContext);
+    const { cart, setCart } = useContext(CartContext);
     const [products, setProducts] = useState([]);
     const [productToDelete, setProductToDelete] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [loadingProducts, setLoadingProducts] = useState({});
+    const [prevTotals, setPrevTotals] = useState({});
 
     const total = products.reduce(
         (acc, product) => acc + product.price * product.quantity,
@@ -27,11 +31,9 @@ export default function Cart() {
                 setCart(JSON.parse(storedCart));
             }
         }
-
         const timer = setTimeout(() => {
             setLoading(false);
         }, 5000);
-
         return () => clearTimeout(timer);
     }, [setCart]);
 
@@ -51,7 +53,6 @@ export default function Cart() {
                 setLoading(false);
             }, 5000);
         }
-
         return () => clearTimeout(timer);
     }, [cart]);
 
@@ -78,41 +79,67 @@ export default function Cart() {
     }
 
     function increaseQuantity(id, properties) {
-        addToCart(id, properties);
-        updateLocalStorage([...cart, { id, properties }]);
-    }
+        const updatedCart = [...cart];
+        const index = updatedCart.findIndex(item => item.id === id && JSON.stringify(item.properties) === JSON.stringify(properties));
+        
+        if (index !== -1) {
+          updatedCart.push({ id, properties });
+          setCart(updatedCart);
+          updateLocalStorage(updatedCart);
+          updatePrevTotal(id, properties);
+        } 
+    }      
 
     function decreaseQuantity(id, properties) {
-        const product = products.find(p => p._id === id && JSON.stringify(p.properties) === JSON.stringify(properties));
-        if (product && product.quantity === 1) {
-            setProductToDelete(product);
-        } else {
-            const updatedCart = [...cart];
-            const index = updatedCart.findIndex(item => item.id === id && JSON.stringify(item.properties) === JSON.stringify(properties));
-            if (index !== -1) {
-                updatedCart.splice(index, 1);
-                setCart(updatedCart);
-                updateLocalStorage(updatedCart);
-            }
-        }
-    }
-
-    function confirmDeleteProduct() {
-        if (productToDelete) {
-            const updatedCart = cart.filter(item => !(item.id === productToDelete._id && JSON.stringify(item.properties) === JSON.stringify(productToDelete.properties)));
+        setLoadingProducts(prev => ({ ...prev, [id]: true }));
+        
+        const updatedCart = [...cart];
+        const productIndex = products.findIndex(p => p._id === id && JSON.stringify(p.properties) === JSON.stringify(properties));
+      
+        if (productIndex !== -1) {
+          const product = products[productIndex];
+          
+          if (product.quantity > 1) {
+            const cartItemIndex = updatedCart.findIndex(item => item.id === id && JSON.stringify(item.properties) === JSON.stringify(properties));
+            updatedCart.splice(cartItemIndex, 1);
             setCart(updatedCart);
             updateLocalStorage(updatedCart);
-            setProductToDelete(null);
+            updatePrevTotal(id, properties);
+          } else if (product.quantity === 1) {
+            setProductToDelete(product);
+          }
+        }
+        setTimeout(() => {
+          setLoadingProducts(prev => ({ ...prev, [id]: false }));
+        }, 1000);
+    }
+      
+    function confirmDeleteProduct() {
+        if (productToDelete) {
+          const updatedCart = cart.filter(item => !(item.id === productToDelete._id && JSON.stringify(item.properties) === JSON.stringify(productToDelete.properties)));
+          setCart(updatedCart);
+          updateLocalStorage(updatedCart);
+          setProductToDelete(null);
         }
     }
-
+      
     function cancelDelete() {
         setProductToDelete(null);
     }
-
+      
     function updateLocalStorage(newCart) {
         if (typeof window !== "undefined") {
             localStorage.setItem("cart", JSON.stringify(newCart));
+        }
+    }
+
+    function updatePrevTotal(id, properties) {
+        const product = products.find(p => p._id === id && JSON.stringify(p.properties) === JSON.stringify(properties));
+        if (product) {
+            setPrevTotals(prev => ({
+                ...prev,
+                [id]: product.price * product.quantity
+            }));
         }
     }
 
@@ -139,10 +166,12 @@ export default function Cart() {
                         <Link href="/shop" className="inline-block mt-4 px-6 py-2 bg-black text-white font-bold rounded-lg hover:bg-gray-800 transition-colors duration-300">
                             Go to Shop
                         </Link>
-                    </div>) : (
+                    </div>
+                ) : (
                     <div>
                         {products.map((product, index) => (
-                            <div key={`${product._id}-${index}`} className="w-full flex max-sm:flex-col border border-gray-400 rounded-lg max-sm:gap-3 hover:bg-grey-2 px-4 py-3 mt-2 items-center max-sm:items-start justify-between">
+                            <div key={`${product._id}-${index}`} className="relative w-full flex max-sm:flex-col border border-gray-400 rounded-lg max-sm:gap-3 hover:bg-grey-2 px-4 py-3 mt-2 items-center max-sm:items-start justify-between">
+                                {loadingProducts[product._id] && <TransparentLoader />}
                                 <div className="flex items-center">
                                     <Link href={`/product/${product.slug}`}>
                                         <Image
@@ -162,13 +191,20 @@ export default function Cart() {
                                                 <span className="font-semibold">{key} :</span> {Array.isArray(value) ? value.join(', ') : value}
                                             </p>
                                         ))}
-                                        <p className="font-medium">$ {product.price * product.quantity}</p>
+                                        <p className="font-medium">$ 
+                                            <CountUp 
+                                                start={prevTotals[product._id] || 0}
+                                                end={product.price * product.quantity}
+                                                decimals={2}
+                                                duration={1}
+                                            />
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <MinusCircle
-                                        className="hover:text-red-700 ml-3 cursor-pointer"
-                                        onClick={() => decreaseQuantity(product._id, product.properties)}
+                                        className={`hover:text-red-700 ml-3 cursor-pointer ${loadingProducts[product._id] ? 'opacity-50' : ''}`}
+                                        onClick={() => !loadingProducts[product._id] && decreaseQuantity(product._id, product.properties)}
                                     />
                                     <span className="text-lg font-medium">{product.quantity}</span>
                                     <PlusCircle
@@ -194,7 +230,15 @@ export default function Cart() {
                 </p>
                 <div className="flex justify-between items-center">
                     <span className="font-bold">Total Amount </span>
-                    <span className="font-bold text-xl">$ {totalRounded}</span>
+                    <span className="font-bold text-xl">$ 
+                        <CountUp 
+                            start={prevTotals.total || 0}
+                            end={totalRounded}
+                            decimals={2}
+                            duration={1}
+                            onEnd={() => setPrevTotals(prev => ({ ...prev, total: totalRounded }))}
+                        />
+                    </span>
                 </div>
                 <button
                     className="w-full bg-white font-bold text-xl hover:text-white hover:bg-black text-heading3-bold py-4 rounded-lg hover:bg-red-2 transition-all duration-300"
@@ -203,7 +247,6 @@ export default function Cart() {
                     Checkout
                 </button>
             </div>
-
             {productToDelete && (
                 <div className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-75">
                     <div className="max-w-sm p-6 bg-white bg-opacity-30 backdrop-blur-md border border-gray-200 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700">
