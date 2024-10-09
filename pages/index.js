@@ -161,7 +161,7 @@ export default function Home({ categories, allProducts, error }) {
             {/* Categories Section */}
             {categories && categories.length > 0 && (
                 <div className="bg-white">
-                    <h2 className="text-3xl font-bold text-gray-800 bg-gray-100 p-6 mb-6 uppercase text-center">Categories</h2>
+                    <h2 className="text-xl sm:text-3xl font-bold text-gray-800 bg-gray-100 p-6 mb-6 uppercase text-center">Categories</h2>
                     <div className="container mx-auto px-4">
                         <div className="grid grid-cols-3 gap-4">
                             {categories.map((category) => (
@@ -193,7 +193,7 @@ export default function Home({ categories, allProducts, error }) {
 
             {/* Products Section */}
             <div className="py-8">
-                <h2 className="text-3xl font-bold text-gray-800 mb-6 uppercase text-center">new arrival</h2>
+                <h2 className="text-xl sm:text-3xl font-bold text-gray-800 mb-6 uppercase text-center">new arrival</h2>
                 <div className="container mx-auto px-4">
                     <ProductsList products={displayedProducts} />
                     {loadingMore && (
